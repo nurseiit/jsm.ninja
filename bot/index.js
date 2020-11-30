@@ -23,11 +23,17 @@ bot.use(Telegraf.log());
 const init = async () => {
   const me = await bot.telegram.getMe();
   bot.options.username = me.username;
-  console.log(`Initialized with nickname ${me.username}!`);
+  console.log(`Initialized bot with nickname ${me.username}!`);
 };
 
 const initWithUserId = async ({ id, first_name }) => {
-  console.log(id, first_name);
+  await usersRef.add({
+    booksStatus: [],
+    id,
+    name: first_name,
+    isAdmin: false,
+    totalReadPages: 0,
+  });
 };
 
 const main = async () => {
