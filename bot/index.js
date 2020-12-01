@@ -67,6 +67,17 @@ const getTotalReadPages = async ({ id }) => {
 
 const numbersRegExp = new RegExp(/\d/g);
 
+const commandsInfo = `ℹ️ Commands
+
+1. Send me a number: I will update your counter:
+  👤: 123
+  🤖: 👍 Updated. You've read a total of 123 pages!
+
+2. Send me /finish ID to mark a book as finished:
+  👤: /finish 1
+  🤖: 👍 Okay, finished book #1 "Как привести дела в порядок?".
+`;
+
 const inputErrMsg = `💥 BOOM... 🔩☠🔧🔨⚡️
 Hmm, that wasn't supposed to happen. You didn't input invalid characters, or did you?
 `;
@@ -89,6 +100,8 @@ const main = async () => {
       } else {
         ctx.reply(`Already initialised.`);
       }
+
+      ctx.reply(commandsInfo);
     } catch (e) {
       ctx.reply(`❌ Could not initialise. Please contact admins!`);
       console.error('[ERROR] Initialisation failed with: ', e);
