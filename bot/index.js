@@ -57,6 +57,14 @@ const getTodayId = async ({ id }) => {
   return snapshot.docs.map((doc) => doc.id)[0];
 };
 
+const getTotalReadPages = async ({ id }) => {
+  const historyRef = usersRef.doc(`${id}`).collection('history');
+  const snapshot = await historyRef.get();
+  return snapshot.docs
+    .map((doc) => doc.data().pages)
+    .reduce((a, b) => a + b, 0);
+};
+
 const numbersRegExp = new RegExp(/\d/g);
 
 const inputErrMsg = `💥 BOOM... 🔩☠🔧🔨⚡️
@@ -95,14 +103,6 @@ const main = async () => {
       } else {
         const { id } = ctx.update.message.from;
         const userRef = usersRef.doc(`${id}`);
-        const user = await userRef.get();
-
-        const totalReadPages = user.data().totalReadPages + pages;
-        await userRef.update({
-          totalReadPages,
-        });
-
-        console.log('[INFO] Updated user totalReadPages.');
 
         const todayId = await getTodayId({ id });
         const todayRef = userRef.collection('history').doc(todayId);
@@ -113,6 +113,13 @@ const main = async () => {
         });
 
         console.log('[INFO] Updated user history pages.');
+
+        const totalReadPages = await getTotalReadPages({ id });
+        await userRef.update({
+          totalReadPages,
+        });
+
+        console.log('[INFO] Updated user totalReadPages.');
 
         ctx.reply(
           `👍 Updated. You've read a total of ${totalReadPages} pages!`
