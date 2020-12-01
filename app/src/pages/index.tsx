@@ -1,4 +1,6 @@
 import { FC } from 'react';
+import firebase from '../utils/firebase';
+import { GetStaticProps } from 'next';
 import styled, { keyframes } from 'styled-components';
 
 const ANIMATION_DURATION = '3s';
@@ -64,12 +66,46 @@ const MovingMoon = styled.span`
   margin: auto -15px;
 `;
 
-const Home: FC = () => (
-  <Centered>
-    <MoonOne />
-    <MovingMoon />
-    <MoonTwo />
-  </Centered>
+type UserType = {
+  isAdmin: boolean;
+  totalReadPages: number;
+  finishedBookIds: number[];
+  name: string;
+};
+interface HomeProps {
+  users: UserType[];
+}
+
+const Home: FC<HomeProps> = ({ users }) => (
+  <>
+    <Centered>
+      <MoonOne />
+      <MovingMoon />
+      <MoonTwo />
+    </Centered>
+    <div>
+      {users.map(({ name, totalReadPages }, idx) => (
+        <span key={name}>
+          {idx + 1}. {name} – {totalReadPages} pages.
+        </span>
+      ))}
+    </div>
+  </>
 );
+
+export const getStaticProps: GetStaticProps = async () => {
+  const db = firebase.firestore();
+  const usersRef = db.collection('users');
+
+  const snapshot = await usersRef.get();
+  const users = snapshot.docs.map((doc) => doc.data());
+
+  return {
+    props: {
+      users,
+    },
+    revalidate: 1, // seconds
+  };
+};
 
 export default Home;
