@@ -5,6 +5,8 @@ const { Telegraf } = require('telegraf');
 const firebase = require('firebase');
 require('firebase/firestore');
 
+const startOfDay = require('date-fns/startOfDay');
+
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -15,6 +17,7 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 const usersRef = db.collection('users');
+// const booksRef = db.collection('books');
 
 const bot = new Telegraf(process.env.TELEGRAM_TOKEN);
 
@@ -33,6 +36,25 @@ const initWithUserId = async ({ id, first_name }) => {
     isAdmin: false,
     totalReadPages: 0,
   });
+};
+
+const getTodayId = async ({ id }) => {
+  const today = startOfDay(new Date());
+  const historyRef = usersRef.doc(`${id}`).collection('history');
+  const snapshot = await historyRef.where('date', '>', today).get();
+
+  if (snapshot.empty) {
+    console.log('[INFO] No matching date found in user history.');
+    console.log('[INFO] Creating a new field.');
+    const doc = await historyRef.add({
+      date: new Date(),
+      pages: 0,
+    });
+    console.log('[INFO] Created history field with id: ', doc.id);
+    return doc.id;
+  }
+
+  return snapshot.docs.map((doc) => doc.id)[0];
 };
 
 const numbersRegExp = new RegExp(/\d/g);
@@ -74,10 +96,24 @@ const main = async () => {
         const { id } = ctx.update.message.from;
         const userRef = usersRef.doc(`${id}`);
         const user = await userRef.get();
+
         const totalReadPages = user.data().totalReadPages + pages;
         await userRef.update({
           totalReadPages,
         });
+
+        console.log('[INFO] Updated user totalReadPages.');
+
+        const todayId = await getTodayId({ id });
+        const todayRef = userRef.collection('history').doc(todayId);
+        const today = await todayRef.get();
+        const todayPages = today.data().pages;
+        await todayRef.update({
+          pages: todayPages + pages,
+        });
+
+        console.log('[INFO] Updated user history pages.');
+
         ctx.reply(
           `👍 Updated. You've read a total of ${totalReadPages} pages!`
         );
