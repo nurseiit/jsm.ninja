@@ -17,7 +17,7 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 const usersRef = db.collection('users');
-// const booksRef = db.collection('books');
+const booksRef = db.collection('books');
 
 const bot = new Telegraf(process.env.TELEGRAM_TOKEN);
 
@@ -65,11 +65,11 @@ const getTotalReadPages = async ({ id }) => {
     .reduce((a, b) => a + b, 0);
 };
 
-const numbersRegExp = new RegExp(/\d/g);
+const numbersRegExp = new RegExp(/^\d+$/);
 
 const commandsInfo = `ℹ️ Commands
 
-1. Send me a number: I will update your counter:
+1. Send me a number, I will update your counter:
   👤: 123
   🤖: 👍 Updated. You've read a total of 123 pages!
 
@@ -111,7 +111,8 @@ const main = async () => {
   bot.hears(numbersRegExp, async (ctx) => {
     try {
       const pages = +ctx.message.text;
-      if (pages < 0) {
+      // eslint-disable-next-line no-restricted-globals
+      if (pages < 0 || typeof pages !== 'number' || isNaN(pages)) {
         ctx.reply(inputErrMsg);
       } else {
         const { id } = ctx.update.message.from;
@@ -143,6 +144,19 @@ const main = async () => {
       console.error('[ERROR] Update pages failed with: ', e);
     }
   });
+  bot.command('books', async ({ reply }) => {
+    const books = await booksRef.get();
+
+    const allBooks = books.docs
+      .map((book) => book.data())
+      .sort((a, b) => a.id - b.id)
+      .map(({ id, name, pages }) => `${id}. ${name} - ${pages} pages.`)
+      .join('\n');
+
+    reply(allBooks);
+  });
+
+  bot.command('help', ({ reply }) => reply(commandsInfo));
 
   bot.launch();
 };
