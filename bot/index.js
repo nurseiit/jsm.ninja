@@ -140,9 +140,8 @@ const main = async () => {
 
         console.log('[INFO] Updated user totalReadPages.');
 
-        ctx.reply(
-          `👍 Updated. You've read a total of ${totalReadPages} pages!`
-        );
+        ctx.reply(`👍 Updated. You read ${todayPages + pages} pages today.`);
+        setTimeout(() => ctx.reply(`Total of ${totalReadPages} pages!`), 50);
       }
     } catch (e) {
       ctx.reply('❌ Could not update. Please, try again!');
