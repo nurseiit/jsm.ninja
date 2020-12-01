@@ -31,7 +31,7 @@ const init = async () => {
 
 const initWithUserId = async ({ id, first_name }) => {
   await usersRef.doc(`${id}`).set({
-    booksStatus: [],
+    finishedBookIds: [],
     name: first_name,
     isAdmin: false,
     totalReadPages: 0,
@@ -55,6 +55,11 @@ const getTodayId = async ({ id }) => {
   }
 
   return snapshot.docs.map((doc) => doc.id)[0];
+};
+
+const bookExists = async ({ bookId }) => {
+  const snapshot = await booksRef.where('id', '==', bookId).get();
+  return !snapshot.empty;
 };
 
 const getTotalReadPages = async ({ id }) => {
@@ -144,6 +149,7 @@ const main = async () => {
       console.error('[ERROR] Update pages failed with: ', e);
     }
   });
+
   bot.command('books', async ({ reply }) => {
     const books = await booksRef.get();
 
@@ -154,6 +160,38 @@ const main = async () => {
       .join('\n');
 
     reply(allBooks);
+  });
+
+  bot.command('finish', async (ctx) => {
+    try {
+      const { id } = ctx.update.message.from;
+      const bookId = +ctx.message.text.split(' ')[1];
+
+      const bookDoesNotExist = !(await bookExists({ bookId }));
+
+      if (bookDoesNotExist) {
+        ctx.reply(
+          `❌ book with id: ${bookId} does not exist. Try /books to see all available books.`
+        );
+        return;
+      }
+
+      const userRef = await usersRef.doc(`${id}`);
+      const user = await userRef.get();
+
+      const { finishedBookIds } = user.data();
+      if (finishedBookIds.includes(bookId)) {
+        ctx.reply(`☑️ you've already marked this book as finished.`);
+      } else {
+        userRef.update({
+          finishedBookIds: [...finishedBookIds, bookId].sort((a, b) => a - b),
+        });
+        ctx.reply(`✅ Marked book as finished!`);
+      }
+    } catch (e) {
+      ctx.reply(inputErrMsg);
+      console.error('[ERROR] Book update failed with: ', e);
+    }
   });
 
   bot.command('help', ({ reply }) => reply(commandsInfo));
