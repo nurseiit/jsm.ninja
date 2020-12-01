@@ -57,9 +57,9 @@ const getTodayId = async ({ id }) => {
   return snapshot.docs.map((doc) => doc.id)[0];
 };
 
-const bookExists = async ({ bookId }) => {
+const getBook = async ({ bookId }) => {
   const snapshot = await booksRef.where('id', '==', bookId).get();
-  return !snapshot.empty;
+  return snapshot.empty ? null : snapshot.docs[0].data();
 };
 
 const getTotalReadPages = async ({ id }) => {
@@ -80,7 +80,9 @@ const commandsInfo = `ℹ️ Commands
 
 2. Send me /finish ID to mark a book as finished:
   👤: /finish 1
-  🤖: 👍 Okay, finished book #1 "Как привести дела в порядок?".
+  🤖: ✅ Okay, finished book #1 "Как привести дела в порядок?".
+
+3. Send me /books to see all available books.
 `;
 
 const inputErrMsg = `💥 BOOM... 🔩☠🔧🔨⚡️
@@ -164,11 +166,15 @@ const main = async () => {
   bot.command('finish', async (ctx) => {
     try {
       const { id } = ctx.update.message.from;
+
+      if (ctx.message.text.split(' ').length < 2)
+        throw Error('argument not provided');
+
       const bookId = +ctx.message.text.split(' ')[1];
 
-      const bookDoesNotExist = !(await bookExists({ bookId }));
+      const book = await getBook({ bookId });
 
-      if (bookDoesNotExist) {
+      if (!book) {
         ctx.reply(
           `❌ book with id: ${bookId} does not exist. Try /books to see all available books.`
         );
@@ -185,7 +191,7 @@ const main = async () => {
         userRef.update({
           finishedBookIds: [...finishedBookIds, bookId].sort((a, b) => a - b),
         });
-        ctx.reply(`✅ Marked book as finished!`);
+        ctx.reply(`✅ Okay, finished book #${bookId} "${book.name}".`);
       }
     } catch (e) {
       ctx.reply(inputErrMsg);
