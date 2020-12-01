@@ -85,9 +85,9 @@ const Home: FC<HomeProps> = ({ users }) => (
     </Centered>
     <div>
       {users.map(({ name, totalReadPages }, idx) => (
-        <span key={name}>
+        <div key={name}>
           {idx + 1}. {name} – {totalReadPages} pages.
-        </span>
+        </div>
       ))}
     </div>
   </>
