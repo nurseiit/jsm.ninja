@@ -72,21 +72,21 @@ const getTotalReadPages = async ({ id }) => {
 
 const numbersRegExp = new RegExp(/^\d+$/);
 
-const commandsInfo = `ℹ️ Commands
+const commandsInfo = `ℹ️ Командалар
 
-1. Send me a number, I will update your counter:
-  👤: 123
-  🤖: 👍 Updated. You've read a total of 123 pages!
+1. Оқыған беттер санын жіберіңіз, мен статистикаға қосамын:
+  👤: 69
+  🤖: 👍 Сақтадым. Бүгін 69-ақ бет оқыпсыз.
 
-2. Send me /finish ID to mark a book as finished:
+2. /finish ID деп кітап оқып біткенде жазасыз:
   👤: /finish 1
-  🤖: ✅ Okay, finished book #1 "Как привести дела в порядок?".
+  🤖: ✅ Мақұл, #1 "Как привести дела в порядок?" кітапты бітірдіңіз деп сақтадым.
 
-3. Send me /books to see all available books.
+3. Кітаптардың тізімін /books командасынан біле аласыз.
 `;
 
-const inputErrMsg = `💥 BOOM... 🔩☠🔧🔨⚡️
-Hmm, that wasn't supposed to happen. You didn't input invalid characters, or did you?
+const inputErrMsg = `💥 Өләә... 🔩☠🔧🔨⚡️
+Бұндай болмау керек сияқты еді. Қате зат жазбадыңыз ғой?!
 `;
 
 const main = async () => {
@@ -94,23 +94,25 @@ const main = async () => {
 
   bot.start(async (ctx) => {
     const { first_name, id } = ctx.update.message.from;
-    ctx.reply(`Welcome ${first_name}!`);
+    ctx.reply(`Сәлем ${first_name}!`);
 
     try {
       const user = await usersRef.doc(`${id}`).get();
       if (!user.exists) {
-        ctx.reply(`Initialising a new user.`);
+        ctx.reply(`Жаңа қолданушыны базаға сақтаудамын.`);
         console.log(`[INFO] Initialising a new user with id: ${id}.`);
         await initWithUserId({ id, first_name });
-        ctx.reply(`✅ Done.`);
+        ctx.reply(`✅ Болды.`);
         console.log('[INFO] User initialised!');
       } else {
-        ctx.reply(`Already initialised.`);
+        ctx.reply(`Базада бар екенсіз.`);
       }
 
       ctx.reply(commandsInfo);
     } catch (e) {
-      ctx.reply(`❌ Could not initialise. Please contact admins!`);
+      ctx.reply(
+        `❌ Қате болды мынау! Админдерге [@nurseiit] хабарлассаңыз дұрыс ау.`
+      );
       console.error('[ERROR] Initialisation failed with: ', e);
     }
   });
@@ -142,11 +144,14 @@ const main = async () => {
 
         console.log('[INFO] Updated user totalReadPages.');
 
-        ctx.reply(`👍 Updated. You read ${todayPages + pages} pages today.`);
-        setTimeout(() => ctx.reply(`Total of ${totalReadPages} pages!`), 50);
+        ctx.reply(`👍 Сақтадым. Бүгін ${todayPages + pages}-ақ бет оқыпсыз.`);
+        setTimeout(
+          () => ctx.reply(`Бар жоғы деген ${totalReadPages} бет екен!`),
+          50
+        );
       }
     } catch (e) {
-      ctx.reply('❌ Could not update. Please, try again!');
+      ctx.reply('❌ Сақтай алмадым. Тағы да жазып көр!');
       console.error('[ERROR] Update pages failed with: ', e);
     }
   });
@@ -157,7 +162,7 @@ const main = async () => {
     const allBooks = books.docs
       .map((book) => book.data())
       .sort((a, b) => a.id - b.id)
-      .map(({ id, name, pages }) => `${id}. ${name} - ${pages} pages.`)
+      .map(({ id, name, pages }) => `${id}. ${name} - ${pages} бет.`)
       .join('\n');
 
     reply(allBooks);
@@ -176,7 +181,7 @@ const main = async () => {
 
       if (!book) {
         ctx.reply(
-          `❌ book with id: ${bookId} does not exist. Try /books to see all available books.`
+          `❌ Нөмірі ${bookId} деген кітап жоқ. Кітаптардың тізімін /books командасынан біле аласың.`
         );
         return;
       }
@@ -186,12 +191,14 @@ const main = async () => {
 
       const { finishedBookIds } = user.data();
       if (finishedBookIds.includes(bookId)) {
-        ctx.reply(`☑️ you've already marked this book as finished.`);
+        ctx.reply(`☑️ Бұл кітапты оқып қойдым деп айтып қойыпсың ғо.`);
       } else {
         userRef.update({
           finishedBookIds: [...finishedBookIds, bookId].sort((a, b) => a - b),
         });
-        ctx.reply(`✅ Okay, finished book #${bookId} "${book.name}".`);
+        ctx.reply(
+          `✅ Мақұл, #${bookId} "${book.name}" кітапты бітірдің деп сақтадым.`
+        );
       }
     } catch (e) {
       ctx.reply(inputErrMsg);
