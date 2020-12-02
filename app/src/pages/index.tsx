@@ -1,6 +1,8 @@
 import { FC } from 'react';
-import firebase from '../utils/firebase';
 import { GetStaticProps } from 'next';
+import firebase from '../utils/firebase';
+
+import { Code, Page, Table, Badge } from '@geist-ui/react';
 import AnimatedMoon from '../components/animatedMoon';
 
 type UserType = {
@@ -13,18 +15,24 @@ interface HomeProps {
   users: UserType[];
 }
 
-const Home: FC<HomeProps> = ({ users }) => (
-  <>
-    <AnimatedMoon />
-    <div>
-      {users.map(({ name, totalReadPages }, idx) => (
-        <div key={name}>
-          {idx + 1}. {name} – {totalReadPages} pages.
-        </div>
-      ))}
-    </div>
-  </>
-);
+const Home: FC<HomeProps> = ({ users }) => {
+  return (
+    <Page>
+      <AnimatedMoon />
+      <Table
+        data={users.map(({ name, totalReadPages }, idx) => ({
+          name: <Code>{name}</Code>,
+          idx: idx + 1,
+          total: <Badge type="success">{totalReadPages}</Badge>,
+        }))}
+      >
+        <Table.Column prop="idx" label="#" width={50} />
+        <Table.Column prop="name" label="Name" width={250} />
+        <Table.Column prop="total" label="Total Pages" />
+      </Table>
+    </Page>
+  );
+};
 
 export const getStaticProps: GetStaticProps = async () => {
   const db = firebase.firestore();

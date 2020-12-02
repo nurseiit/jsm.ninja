@@ -1,8 +1,8 @@
 import { Theme } from './types';
 
 const defaultTheme: Theme = {
-  background: '#233343',
-  color: '#f5f5f5',
+  background: 'white',
+  color: 'black',
 };
 
 export default defaultTheme;
