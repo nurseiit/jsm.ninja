@@ -1,6 +1,7 @@
 import App from 'next/app';
 import Head from 'next/head';
 import { ThemeProvider } from 'styled-components';
+import { GeistProvider, CssBaseline } from '@geist-ui/react';
 
 import GlobalStyle from '../themes/globalStyle';
 import defaultTheme from '../themes/defaultTheme';
@@ -16,7 +17,10 @@ class MyApp extends App {
         </Head>
         <ThemeProvider theme={defaultTheme}>
           <GlobalStyle />
-          <Component {...pageProps} />
+          <GeistProvider>
+            <CssBaseline />
+            <Component {...pageProps} />
+          </GeistProvider>
         </ThemeProvider>
       </>
     );

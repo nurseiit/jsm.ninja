@@ -9,5 +9,6 @@ export default createGlobalStyle<GlobalStyleProps>`${({ theme }) => `body {
     background: ${theme.background};
     color: ${theme.color};
     font-family: 'Baloo 2', cursive;
+    min-height: 100vh;
   }`}
 `;

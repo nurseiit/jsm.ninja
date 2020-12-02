@@ -7,6 +7,7 @@ import Document, {
   DocumentInitialProps,
 } from 'next/document';
 import { ServerStyleSheet } from 'styled-components';
+import { CssBaseline } from '@geist-ui/react';
 
 export default class MyDocument extends Document {
   static async getInitialProps(
@@ -14,6 +15,8 @@ export default class MyDocument extends Document {
   ): Promise<DocumentInitialProps> {
     const sheet = new ServerStyleSheet();
     const originalRenderPage = ctx.renderPage;
+
+    const styles = CssBaseline.flush();
 
     try {
       ctx.renderPage = () =>
@@ -29,6 +32,7 @@ export default class MyDocument extends Document {
           <>
             {initialProps.styles}
             {sheet.getStyleElement()}
+            {styles}
           </>
         ),
       };
