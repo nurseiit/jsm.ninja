@@ -7,6 +7,7 @@ import AnimatedMoon from '../components/animatedMoon';
 
 type UserType = {
   isAdmin: boolean;
+  isHidden: boolean;
   totalReadPages: number;
   finishedBookIds: number[];
   name: string;
@@ -41,6 +42,7 @@ export const getStaticProps: GetStaticProps = async () => {
   const snapshot = await usersRef.get();
   const users = snapshot.docs
     .map((doc) => doc.data())
+    .filter((user) => !user.isHidden)
     .sort((a, b) => b.totalReadPages - a.totalReadPages);
 
   return {
