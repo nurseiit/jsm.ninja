@@ -84,7 +84,7 @@ const commandsInfo = `ℹ️ Командалар
 
 3. Кітаптардың тізімін /books командасынан біле аласыз.
 
-4. Бүгінгі күннің статистикасын тазалау үшін: /resetToday
+4. Бүгінгі күннің статистикасын тазалау үшін: /reset_today
 `;
 
 const inputErrMsg = `💥 Өләә... 🔩☠🔧🔨⚡️
@@ -208,7 +208,7 @@ const main = async () => {
     }
   });
 
-  bot.command('resetToday', async (ctx) => {
+  bot.command('reset_today', async (ctx) => {
     try {
       const { id } = ctx.update.message.from;
       const userRef = usersRef.doc(`${id}`);
