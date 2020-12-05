@@ -238,6 +238,35 @@ const main = async () => {
     }
   });
 
+  bot.command('announce', async (ctx) => {
+    try {
+      const { id } = ctx.update.message.from;
+
+      const userRef = await usersRef.doc(`${id}`);
+      const user = await userRef.get();
+
+      const { isAdmin } = user.data();
+
+      if (!isAdmin) {
+        ctx.reply('🍆 админдер ғана қолдана алатын команда.');
+        return;
+      }
+      const message = ctx.message.text.split(' ').slice(1).join(' ');
+      ctx.reply(`🎤 Announcing "${message}".`);
+
+      const snapshots = await usersRef.get();
+      const userIds = snapshots.docs.map((snapshot) => snapshot.id);
+
+      userIds.forEach((userId) => {
+        // fix: try / catch will fail if this throws ERROR i.e. 400
+        bot.telegram.sendMessage(userId, message);
+      });
+    } catch (e) {
+      ctx.reply(`❌ Сорри, че то не то. Мүмкін сообщение бос кетіп қалды?`);
+      console.error('[ERROR] Book update failed with: ', e);
+    }
+  });
+
   bot.command('help', ({ reply }) => reply(commandsInfo));
 
   bot.launch();
