@@ -76,13 +76,15 @@ const commandsInfo = `ℹ️ Командалар
 
 1. Оқыған беттер санын жіберіңіз, мен статистикаға қосамын:
   👤: 69
-  🤖: 👍 Сақтадым. Бүгін 69-ақ бет оқыпсыз.
+  🤖: 👍 Сақтадым. Бүгін 69 бет оқыпсыз.
 
 2. /finish ID деп кітап оқып біткенде жазасыз:
   👤: /finish 1
   🤖: ✅ Мақұл, #1 "Как привести дела в порядок?" кітапты бітірдіңіз деп сақтадым.
 
 3. Кітаптардың тізімін /books командасынан біле аласыз.
+
+4. Бүгінгі күннің статистикасын тазалау үшін: /resetToday
 `;
 
 const inputErrMsg = `💥 Өләә... 🔩☠🔧🔨⚡️
@@ -144,9 +146,9 @@ const main = async () => {
 
         console.log('[INFO] Updated user totalReadPages.');
 
-        ctx.reply(`👍 Сақтадым. Бүгін ${todayPages + pages}-ақ бет оқыпсыз.`);
+        ctx.reply(`👍 Сақтадым. Бүгін ${todayPages + pages} бет оқыпсыз.`);
         setTimeout(
-          () => ctx.reply(`Бар жоғы деген ${totalReadPages} бет екен!`),
+          () => ctx.reply(`Барлығы ${totalReadPages} бет екен 💪!`),
           50
         );
       }
@@ -203,6 +205,36 @@ const main = async () => {
     } catch (e) {
       ctx.reply(inputErrMsg);
       console.error('[ERROR] Book update failed with: ', e);
+    }
+  });
+
+  bot.command('resetToday', async (ctx) => {
+    try {
+      const { id } = ctx.update.message.from;
+      const userRef = usersRef.doc(`${id}`);
+
+      const todayId = await getTodayId({ id });
+      const todayRef = userRef.collection('history').doc(todayId);
+      const today = await todayRef.get();
+      const todayPages = today.data().pages;
+      await todayRef.update({
+        pages: 0,
+      });
+
+      console.log('[INFO] Reset today pages.');
+
+      const totalReadPages = await getTotalReadPages({ id });
+      await userRef.update({
+        totalReadPages,
+      });
+
+      console.log('[INFO] Updated total read pages after reset.');
+
+      ctx.reply(`👍 Бүгінгі статистиканы [${todayPages} бет] тазаладым.`);
+      setTimeout(() => ctx.reply(`Енді барлығы ${totalReadPages} бет 💪!`), 50);
+    } catch (e) {
+      ctx.reply('❌ Сақтай алмадым. Тағы да жазып көр!');
+      console.error('[ERROR] Reset today failed with: ', e);
     }
   });
 
