@@ -9,6 +9,8 @@ import AnimatedMoon from '../components/animatedMoon';
 
 import { HomeProps, UserType } from '../types';
 
+const MIN_PAGES_PER_DAY = 25;
+
 const Home: FC<HomeProps> = ({ users, daysFromStart, books }) => (
   <Page>
     <AnimatedMoon />
@@ -18,12 +20,27 @@ const Home: FC<HomeProps> = ({ users, daysFromStart, books }) => (
       data={users.map(({ name, totalReadPages }, idx) => ({
         name: <Code>{name}</Code>,
         idx: idx + 1,
-        total: <Badge type="success">{totalReadPages}</Badge>,
+        total: (
+          <Badge
+            type={
+              totalReadPages >= MIN_PAGES_PER_DAY * daysFromStart
+                ? 'success'
+                : 'warning'
+            }
+          >
+            {totalReadPages}
+          </Badge>
+        ),
       }))}
     >
       <Table.Column prop="idx" label="#" width={50} />
       <Table.Column prop="name" label="Name" width={250} />
-      <Table.Column prop="total" label="Total Pages" />
+      <Table.Column
+        prop="total"
+        label={`25 * ${daysFromStart} = ${
+          MIN_PAGES_PER_DAY * daysFromStart
+        } pages`}
+      />
     </Table>
   </Page>
 );
