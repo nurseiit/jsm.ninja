@@ -9,13 +9,15 @@ import { Page, Grid } from '@geist-ui/react';
 import AnimatedMoon from '../components/animatedMoon';
 import TotalReadTable from '../components/totalReadTable';
 import BooksTable from '../components/booksTable';
+import TodayReadTable from '../components/todayReadTable';
 
 import { HomeProps, UserType } from '../types';
 
 const Home: FC<HomeProps> = ({ users, daysFromStart, books }) => (
   <Page>
     <AnimatedMoon />
-    <Grid.Container gap={2}>
+    <Grid.Container gap={2} alignContent="center">
+      <TodayReadTable users={users} daysFromStart={daysFromStart} />
       <TotalReadTable users={users} daysFromStart={daysFromStart} />
       <BooksTable users={users} books={books} />
     </Grid.Container>

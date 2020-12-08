@@ -1,5 +1,5 @@
 import { FC, useMemo } from 'react';
-import { Code, Table, Grid } from '@geist-ui/react';
+import { Code, Table, Grid, Collapse } from '@geist-ui/react';
 import { BookType, UserType } from '../types';
 
 interface BooksTableProps {
@@ -23,14 +23,15 @@ const BooksTable: FC<BooksTableProps> = ({ users, books }) => {
     [users, books]
   );
   return (
-    <Grid xs={24} sm={12}>
-      <h2>Books</h2>
-      <Table data={booksData}>
-        <Table.Column prop="id" label="#" width={50} />
-        <Table.Column prop="name" label="name" width={300} />
-        <Table.Column prop="pages" label="pages" width={50} />
-        <Table.Column prop="finished" label="# finished" />
-      </Table>
+    <Grid xs={24} sm={14}>
+      <Collapse title="Books">
+        <Table data={booksData}>
+          <Table.Column prop="id" label="#" width={50} />
+          <Table.Column prop="name" label="name" width={300} />
+          <Table.Column prop="pages" label="pages" width={50} />
+          <Table.Column prop="finished" label="# finished" />
+        </Table>
+      </Collapse>
     </Grid>
   );
 };
