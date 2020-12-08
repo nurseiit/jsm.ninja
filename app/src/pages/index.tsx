@@ -4,44 +4,21 @@ import { GetStaticProps } from 'next';
 import firebase from '../utils/firebase';
 import daysBetweenDates from '../utils/daysBetweenDates';
 
-import { Code, Page, Table, Badge } from '@geist-ui/react';
+import { Page, Grid } from '@geist-ui/react';
+
 import AnimatedMoon from '../components/animatedMoon';
+import TotalReadTable from '../components/totalReadTable';
+import BooksTable from '../components/booksTable';
 
 import { HomeProps, UserType } from '../types';
-
-const MIN_PAGES_PER_DAY = 25;
 
 const Home: FC<HomeProps> = ({ users, daysFromStart, books }) => (
   <Page>
     <AnimatedMoon />
-    <pre>{JSON.stringify(books, null, 2)}</pre>
-    <h1>Day #{daysFromStart}</h1>
-    <Table
-      data={users.map(({ name, totalReadPages }, idx) => ({
-        name: <Code>{name}</Code>,
-        idx: idx + 1,
-        total: (
-          <Badge
-            type={
-              totalReadPages >= MIN_PAGES_PER_DAY * daysFromStart
-                ? 'success'
-                : 'warning'
-            }
-          >
-            {totalReadPages}
-          </Badge>
-        ),
-      }))}
-    >
-      <Table.Column prop="idx" label="#" width={50} />
-      <Table.Column prop="name" label="Name" width={250} />
-      <Table.Column
-        prop="total"
-        label={`25 * ${daysFromStart} = ${
-          MIN_PAGES_PER_DAY * daysFromStart
-        } pages`}
-      />
-    </Table>
+    <Grid.Container gap={2}>
+      <TotalReadTable users={users} daysFromStart={daysFromStart} />
+      <BooksTable users={users} books={books} />
+    </Grid.Container>
   </Page>
 );
 
